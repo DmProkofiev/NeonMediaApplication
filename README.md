@@ -1,8 +1,8 @@
 # NeonMediaApplication
 Программа предназначенная для воспроизведения всех медиа файлов (аудио\видео), конвертации форматов, экспорта аудио из видео, редактирование метаданных медиа файлов(название альбома, артист, группа, обложка альбома, жанр,).
 
-Движок VLC\n
+Движок VLC  
 Библиотеки: 
-VideoLAN.LibVLC.Windows
-LibVLCSharp
-LibVLCSharp.WPF
+VideoLAN.LibVLC.Windows  
+LibVLCSharp  
+LibVLCSharp.WPF  
