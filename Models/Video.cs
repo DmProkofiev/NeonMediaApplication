@@ -8,6 +8,7 @@ namespace NeonMediaApplication.Models
 {
     class Video : MediaFile
     {
+        //Обьект для видео, наследник MediaFile
         public int? Width { get; set; } // Ширина в пикселях
         public int? Height { get; set; } // Высота в пикселях
         public string VideoCodec { get; set; } // Видео кодек
