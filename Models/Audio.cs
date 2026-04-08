@@ -9,6 +9,7 @@ namespace NeonMediaApplication.Models
 
     public class Audio : MediaFile
     {
+        //Обьект для аудио, наследник MediaFile
         public string AudioCodec { get; set; } // Аудио кодек
         public int? BitRate { get; set; } // Битрейт kbps
         public int? SampleRate { get; set; } // Частота дискретизации 
