@@ -11,3 +11,5 @@
 `VideoLAN.LibVLC.Windows` - нативный C++ движок VLC. Содержит DLL-библиотеки и кодеки. Обеспечивает декодирование видео/аудио. В коде не используется напрямую. Просто лежит в папке bin.  
 `LibVLCSharp` - C# обёртка над нативным движком. Даёт классы LibVLC, MediaPlayer, Media. Отвечает за управление воспроизведением: Play, Pause, Stop, Volume, Time. Используется в C# коде.  
 `LibVLCSharp.WPF` - WPF-контрол VideoView для отображения видео. Используется в XAML. Без него видео не покажется  
+Документация:  
+https://docs.videolan.me/libvlcsharp/
