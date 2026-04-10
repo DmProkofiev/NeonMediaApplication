@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NeonMediaApplication.Models
 {
-    class Video : MediaFile
+    public class Video : MediaFile
     {
         //Обьект для видео, наследник MediaFile
         public int? Width { get; set; } // Ширина в пикселях
