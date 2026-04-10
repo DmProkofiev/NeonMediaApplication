@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NeonMediaApplication.Interfaces
+namespace NeonMediaApplication.Services
 {
-    public interface IVideoLANClientService
+    public class ExportAudioService
     {
 
     }

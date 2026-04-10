@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NeonMediaApplication.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NeonMediaApplication.Factories
 {
-    public class MediaFactory
+    public class MediaFactory: IMediaFactory
     {
 
     }
