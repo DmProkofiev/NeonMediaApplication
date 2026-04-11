@@ -12,15 +12,13 @@ namespace NeonMediaApplication.ViewModels
     {
         //Хранение Обьектов
         private readonly IMediaEngine _mediaEngine; //обьект движка VLC
-        private readonly IMediaFactory _mediaFactory; //обьект фабрики для создания медиа объектов
         private readonly IFileService _fileService; // интерфейс файлового сервиса
 
         public bool isTurningOn = false; //Статус воспроизведения
         private ObservableCollection<MediaFile> PlayList { get; set; } = new ObservableCollection<MediaFile>(); //Коллекция для хранения плейлиста
-        public MainWindowViewModel(IMediaEngine mediaEngine, IMediaFactory mediaFactory, IFileService fileService) //Конструктор DI
+        public MainWindowViewModel(IMediaEngine mediaEngine, IFileService fileService) //Конструктор DI
         {
             _mediaEngine = mediaEngine;
-            _mediaFactory = mediaFactory;
             _fileService = fileService;
         }
         private string _file;
@@ -55,7 +53,7 @@ namespace NeonMediaApplication.ViewModels
                             {
                                 var mediaFile = await _fileService.ParseMediaAsync(filePath);
                                 PlayList.Add(mediaFile);
-                                //MessageBox.Show($"{mediaFile.FileName} {mediaFile.FilePath} {mediaFile.Duration} {mediaFile.Type}"); отладка парсинга файла
+                                //MessageBox.Show($"{mediaFile.FileName} {mediaFile.FilePath} {mediaFile.Duration} {mediaFile.Type} {mediaFile}"); //отладка парсинга файла
                             }
                             catch (NotSupportedException ex)
                             {

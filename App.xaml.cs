@@ -26,7 +26,6 @@ namespace NeonMediaApplication
             // Регистрация сервисов
             services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<IMediaEngine, MediaEngine>();
-            services.AddSingleton<IMediaFactory, MediaFactory>();
             services.AddTransient<MainWindowViewModel>();
             services.AddSingleton<MainWindow>();
             ServiceProvider = services.BuildServiceProvider();
