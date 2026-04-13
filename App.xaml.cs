@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NeonMediaApplication.Engine;
-using NeonMediaApplication.Factories;
 using NeonMediaApplication.Interfaces;
 using NeonMediaApplication.Services;
 using NeonMediaApplication.ViewModels;
@@ -16,22 +15,28 @@ namespace NeonMediaApplication
     /// </summary>
     public partial class App : Application
     {
-        public static IServiceProvider ServiceProvider { get; private set; }
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             var services = new ServiceCollection();
+            ConfigureServices(services);
+            var provider = services.BuildServiceProvider();
+            var mainWindow = provider.GetRequiredService<MainWindow>();
+            var viewModel = provider.GetRequiredService<MainWindowViewModel>();
+            //var mediaEngine = provider.GetRequiredService<MediaEngine>();
+            mainWindow.DataContext = viewModel;
+            //mainWindow.DataContext = mediaEngine;
+            mainWindow.Show();
+        }
 
-            // Регистрация сервисов
+        private void ConfigureServices(IServiceCollection services)
+        {
             services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<IMediaEngine, MediaEngine>();
+            services.AddSingleton<IDialogService, DialogService>();
             services.AddTransient<MainWindowViewModel>();
-            services.AddSingleton<MainWindow>();
-            ServiceProvider = services.BuildServiceProvider();
-            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-            mainWindow.DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>();
-            mainWindow.Show();
+            services.AddTransient<MainWindow>();
         }
     }
 

@@ -11,6 +11,6 @@ namespace NeonMediaApplication.Interfaces
     //Задача: 
     public interface IFileService
     {
-         Task<MediaFile> ParseMediaAsync(string path);
+         Task<MediaFile> ParseFileAsync(string path);
     }
 }
