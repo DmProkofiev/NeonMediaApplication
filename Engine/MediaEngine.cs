@@ -1,11 +1,12 @@
 ﻿using LibVLCSharp.Shared;
+using NeonMediaApplication.Interfaces;
+using NeonMediaApplication.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NeonMediaApplication.Interfaces;
 
 namespace NeonMediaApplication.Engine
 {
@@ -65,17 +66,17 @@ namespace NeonMediaApplication.Engine
             _mediaPlayer.TimeChanged += OnTimeChanged;
         }
         //Загрузка медиа фалйа в двжиок
-        public async Task<bool> ParseMediaAsync() //метод распаковки медиафайла
+        public async Task<bool> ReadMediaAsync() //метод распаковки медиафайла
         {
             if (_currentMedia == null)
             {
-                Debug.WriteLine("Ошибка: Нет загруженного медиафайла для парсинга.");
+                Debug.WriteLine("Ошибка: Нет медиафайла");
                 return false;
             }
 
             try
             {
-                await _currentMedia.Parse(MediaParseOptions.ParseNetwork);
+                
                 if (_currentMedia.ParsedStatus == MediaParsedStatus.Done)
                 {
 
@@ -99,31 +100,30 @@ namespace NeonMediaApplication.Engine
             _currentMedia?.Dispose();
             _currentMedia = new Media(_libVLC, filePath); //создание нового обьекта для воспроизведения
         }
-        //Метод работы плеера
-        public async Task Play() // метод воспроизведения
+        //Метод работы воспроизведения плеера 
+        public async Task PlayAsync() // метод воспроизведения
         {
             if (_currentMedia != null)
             {
                 _mediaPlayer.Play(_currentMedia);
             }
         }
-        public async Task Pause() //метод паузы
+        public async Task PauseAsync() //метод паузы
         {
             _mediaPlayer.Pause();
         }
-        public async Task Stop() //метод стоп
+        public async Task StopAsync() //метод стоп
         {
             _mediaPlayer.Stop();
         }
-        public async Task SetVolume(int volume) //Управление параметрами
+        public async Task SetVolumeAsync(int volume) //Управление параметрами
         {
             _mediaPlayer.Volume = volume;
         }
-        public async Task Seek(TimeSpan position) //метод перемотки
+        public async Task SeekAsync(TimeSpan position) //метод перемотки
         {
             _mediaPlayer.Time = (long)position.TotalMilliseconds;
         }
-
         public void Dispose() //Освобождение ресурсов 
         {
             _currentMedia?.Dispose();

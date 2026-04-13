@@ -15,6 +15,7 @@ namespace NeonMediaApplication.Models
         public int? SampleRate { get; set; } // Частота дискретизации 
         public int? TrackNumber { get; set; } // Номер трека в альбоме 
         public override bool CanExportAudio => false; // Запрет на экспорт
+        public byte[]? CoverArt { get; set; } // Обложка альбома массив байтов
         public override MediaType Type => MediaType.Audio;
         public override string GetDescription()
         {

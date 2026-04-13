@@ -17,7 +17,7 @@ namespace NeonMediaApplication.Services
     //Задача: Парсинг файла, создание обьекта модели(Audio/Video), передача в движок
     public class FileService : IFileService
     {
-        public async Task<MediaFile> ParseMediaAsync(string filePath)
+        public async Task<MediaFile> ParseFileAsync(string filePath) // Метод интерфейса IFileService
         {
             return await Task.Run(() => GetFile(filePath));
         }
@@ -40,7 +40,8 @@ namespace NeonMediaApplication.Services
                         AudioCodec = GetAudioCodec(item),
                         BitRate = (int?)item.Properties.AudioBitrate,
                         SampleRate = item.Properties.AudioSampleRate,
-                        TrackNumber = (int?)item.Tag.Track
+                        TrackNumber = (int?)item.Tag.Track,
+                        CoverArt = GetCoverArt(item)
                     };
                 }
                 else if (extension == ".mp4" || extension == ".mkv" || extension == ".avi" || extension == ".wmv")
@@ -104,6 +105,23 @@ namespace NeonMediaApplication.Services
                 return firstVideoStream.Description ?? "Неизвестный";
             }
             return "Неизвестный";
+        }
+        private byte[]? GetCoverArt(TagLib.File tagFile)
+        {
+            try
+            {
+                if (tagFile.Tag.Pictures != null && tagFile.Tag.Pictures.Length > 0)
+                {
+                    var picture = tagFile.Tag.Pictures[0];
+                    return picture.Data.Data;
+                }
+            }
+            catch 
+            {
+
+            }
+
+            return null;
         }
     }
 }
