@@ -107,7 +107,7 @@ namespace NeonMediaApplication.ViewModels
                     PlayList.Add(mediaFile);
 
                     CurrentMedia = mediaFile; //Для движка 
-
+                    _mediaEngine.Load(mediaFile.FilePath);
                     await PlayAsync();     
                 }
                 catch (Exception ex)
@@ -118,6 +118,7 @@ namespace NeonMediaApplication.ViewModels
         }
         private async Task PlayAsync() //Метод RemoteControl: воспроизведения команды PlayCommand
         {
+
              await _mediaEngine.PlayAsync();
         }
         private async Task PauseAsync() //Метод RemoteControl: приостановление команды StopCommand 
