@@ -23,6 +23,7 @@ namespace NeonMediaApplication.ViewModels
             _mediaEngine = mediaEngine;
             _fileService = fileService;
             _dialogService = dialogService;
+            _mediaEngine.SetVolumeAsync(_volume);
             _mediaEngine.PositionChanged += pos =>
             {
                 Application.Current.Dispatcher.Invoke(() => CurrentPosition = pos);
@@ -64,6 +65,18 @@ namespace NeonMediaApplication.ViewModels
                 OnPropertyChanged();
                 _seekPosition = value.TotalSeconds;
                 OnPropertyChanged(nameof(SeekPosition));
+            }
+        }
+        private int _volume = 70; // Громкость
+        public int Volume
+        {
+            get => _volume;
+            set
+            {
+                if (_volume == value) return;
+                _volume = value;
+                OnPropertyChanged();
+                _mediaEngine.SetVolumeAsync(value);
             }
         }
         private string _file;
