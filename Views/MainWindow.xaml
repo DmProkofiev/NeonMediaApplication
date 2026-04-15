@@ -7,7 +7,7 @@
         xmlns:ViewModels="clr-namespace:NeonMediaApplication.ViewModels"
         xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
         mc:Ignorable="d"
-        Title="Neon Media" Height="500" Width="800" MinHeight="250" MinWidth="400" >
+        Title="Neon Media" Height="500" Width="800" MinHeight="400" MinWidth="600" WindowStartupLocation="CenterScreen" >
 
     <Grid x:Name="MainSpace">
         <Grid.RowDefinitions>
@@ -48,7 +48,7 @@
         </Grid>
 
         <vlc:VideoView x:Name="VideoView" Grid.Row="1" Grid.Column="1" MediaPlayer="{Binding MediaPlayer}" />
-        
+
         <Grid x:Name="DurationLine" Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -73,15 +73,14 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Image Source="{Binding CurrentMedia.CoverArt}"  Grid.Column="0"/>
-                <TextBlock Text="{Binding CurrentMedia.Album, TargetNullValue=Альбом}" Grid.Column="1"/>
-                <TextBlock Text="{Binding CurrentMedia.Title, TargetNullValue=Исполнитель}" Grid.Column="2"/>
+                <Image Source="{Binding CurrentMedia.CoverArt}"  Grid.Column="0" Margin="5,5,5,5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentMedia.Album, TargetNullValue=Альбом}" Grid.Column="1" Margin="5,5,5,5"/>
+                <TextBlock Text="{Binding CurrentMedia.Title, TargetNullValue=Исполнитель}" Grid.Column="2" Margin="5,5,5,5"/>
             </Grid>
-            <Button Content="Play" Command="{Binding PlayCommand}" Width="60" Margin="2" Grid.Column="1"/>
-            <Button Content="Pause" Command="{Binding PauseCommand}" Width="60" Margin="2" Grid.Column="2"/>
+            <Button Content="Pause" Command="{Binding PauseCommand}" Width="60" Margin="2" Grid.Column="1"/>
+            <Button Content="Play" Command="{Binding PlayCommand}" Width="60" Margin="2" Grid.Column="2"/>
             <Button Content="Stop" Command="{Binding StopCommand}" Width="60" Margin="2" Grid.Column="3"/>
-            <Slider Width="150" Minimum="0" Maximum="100" Value="{Binding Volume}" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="4"/>
-            <TextBlock Text="{Binding CurrentMedia.PositionText}" Margin="10,0,10,0" VerticalAlignment="Center" Grid.Column="5"/>
+            <Slider Width="150" Minimum="0" Maximum="100" Value="{Binding Volume}" Margin="5,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="4"/>
         </Grid>
     </Grid>
 </Window>

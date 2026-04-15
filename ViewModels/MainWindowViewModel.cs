@@ -45,16 +45,6 @@ namespace NeonMediaApplication.ViewModels
                 OnPropertyChanged();
             }
         }
-        private string _labelMessage = "App is launched"; 
-        public string LabelMessage
-        {
-            get => _labelMessage;
-            set
-            {
-                _labelMessage = value;
-                OnPropertyChanged();
-            }
-        }
         //Команды
         private RelayCommand _playCommand;
         public RelayCommand PlayCommand
