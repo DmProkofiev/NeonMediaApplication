@@ -10,13 +10,18 @@ namespace NeonMediaApplication.Interfaces
 {
     public interface IMediaEngine
     {
-        Task<bool> ReadMediaAsync();
+        event Action<TimeSpan> PositionChanged;
+        event Action MediaEnded;
         LibVLCSharp.Shared.MediaPlayer MediaPlayer { get; }
+        void Load(string filePath);
+        Task<bool> ReadMediaAsync();
         Task PlayAsync();
         Task StopAsync();
         Task PauseAsync();
-        Task SeekAsync(TimeSpan duration);
+        Task SeekAsync(TimeSpan position);
         Task SetVolumeAsync(int volume);
-        void Load(string filePath);
+        TimeSpan Duration { get; }
+        TimeSpan CurrentPosition { get; }
+        bool IsPlaying { get; }
     }
 }
