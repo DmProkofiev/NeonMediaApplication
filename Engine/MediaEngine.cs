@@ -67,32 +67,23 @@ namespace NeonMediaApplication.Engine
             _mediaPlayer.TimeChanged += OnTimeChanged;
         }
         //Загрузка медиа фалйа в двжиок
-        public async Task<bool> ReadMediaAsync() //метод распаковки медиафайла
+        public async Task<bool> ReadMediaAsync() //Метод распаковки файла
         {
             if (_currentMedia == null)
             {
-                Debug.WriteLine("Ошибка: Нет медиафайла");
                 return false;
             }
 
             try
             {
-                
-                if (_currentMedia.ParsedStatus == MediaParsedStatus.Done)
+                if (_currentMedia.ParsedStatus != MediaParsedStatus.Done)
                 {
-
-                    Debug.WriteLine($"Парсинг успешно завершён. Длительность: {Duration.TotalSeconds} секунд.");
-                    return true;
+                    await _currentMedia.Parse(MediaParseOptions.ParseNetwork);
                 }
-                else
-                {
-                    Debug.WriteLine($"Парсинг не удался. Статус: {_currentMedia.ParsedStatus}");
-                    return false;
-                }
+                return _currentMedia.ParsedStatus == MediaParsedStatus.Done;
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Исключение во время парсинга: {ex.Message}");
                 return false;
             }
         }

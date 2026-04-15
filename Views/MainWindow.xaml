@@ -51,11 +51,13 @@
 
         <Grid x:Name="DurationLine" Grid.Row="2" Grid.Column="1">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Slider Grid.Column="0" Minimum="0" Value="{Binding CurrentPosition.TotalSeconds, Mode=OneWay}" LargeChange="5" SmallChange="1"/>
-            <TextBlock Grid.Column="1" Text="{Binding CurrentMedia.Duration, TargetNullValue=00:00:00, FallbackValue=00:00:00}" Margin="3,0,3,0" VerticalAlignment="Center" FontFamily="Times New Roman" FontWeight="Bold"/>
+            <TextBlock Grid.Column="0" Text="{Binding CurrentMedia.Duration, TargetNullValue=00:00:00, StringFormat=hh\\:mm\\:ss}" Margin="3,0,3,0" VerticalAlignment="Center" FontFamily="Times New Roman" FontWeight="Bold"/>
+            <Slider Grid.Column="1" Minimum="0" Maximum="{Binding DurationSeconds}" Value="{Binding SeekPosition, Mode=TwoWay}" LargeChange="5" SmallChange="1" Margin="5,0,5,0"/>
+            <TextBlock Grid.Column="2" Text="{Binding CurrentPosition, TargetNullValue=00:00:00, StringFormat=hh\\:mm\\:ss}" Margin="3,0,3,0" VerticalAlignment="Center" FontFamily="Times New Roman" FontWeight="Bold"/>
         </Grid>
         <Grid x:Name="RemoteControl" Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Width="Auto">
             <Grid.ColumnDefinitions>
@@ -67,15 +69,15 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Grid Grid.Column="0" Margin="5,5,5,5" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid Grid.Column="0" Margin="5,5,5,5" HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="30">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Image Source="{Binding CurrentMedia.CoverArt}"  Grid.Column="0" Margin="5,5,5,5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <TextBlock Text="{Binding CurrentMedia.Album, TargetNullValue=Альбом}" Grid.Column="1" Margin="5,5,5,5"/>
-                <TextBlock Text="{Binding CurrentMedia.Title, TargetNullValue=Исполнитель}" Grid.Column="2" Margin="5,5,5,5"/>
+                <Image Source="{Binding CurrentMedia.CoverArt}"  Grid.Column="0" Margin="5,5,5,5" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentMedia.Album, TargetNullValue=Альбом}" Grid.Column="1" Margin="5,5,5,5" TextWrapping="Wrap" FontFamily="Times New Roman" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding CurrentMedia.Title, TargetNullValue=Исполнитель}" Grid.Column="2" Margin="5,5,5,5" TextWrapping="Wrap" FontFamily="Times New Roman" HorizontalAlignment="Right"/>
             </Grid>
             <Button Content="Pause" Command="{Binding PauseCommand}" Width="60" Margin="2" Grid.Column="1"/>
             <Button Content="Play" Command="{Binding PlayCommand}" Width="60" Margin="2" Grid.Column="2"/>
