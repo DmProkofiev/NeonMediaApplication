@@ -11,6 +11,7 @@ namespace NeonMediaApplication.Interfaces
     public interface IMediaEngine
     {
         Task<bool> ReadMediaAsync();
+        LibVLCSharp.Shared.MediaPlayer MediaPlayer { get; }
         Task PlayAsync();
         Task StopAsync();
         Task PauseAsync();
