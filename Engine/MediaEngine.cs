@@ -19,8 +19,8 @@ namespace NeonMediaApplication.Engine
         //Поля
         private LibVLC _libVLC;
         private MediaPlayer _mediaPlayer;
-        public LibVLCSharp.Shared.MediaPlayer MediaPlayer => _mediaPlayer;
-        private Media _currentMedia;
+        public LibVLCSharp.Shared.MediaPlayer MediaPlayer => _mediaPlayer; //Обьект плеера
+        private Media _currentMedia; //поле плеера
 
         //Свойства
         public TimeSpan CurrentPosition //текущая позиция воспроизведения
