@@ -24,9 +24,7 @@ namespace NeonMediaApplication
             var provider = services.BuildServiceProvider();
             var mainWindow = provider.GetRequiredService<MainWindow>();
             var viewModel = provider.GetRequiredService<MainWindowViewModel>();
-            //var mediaEngine = provider.GetRequiredService<MediaEngine>();
             mainWindow.DataContext = viewModel;
-            //mainWindow.DataContext = mediaEngine;
             mainWindow.Show();
         }
 

@@ -12,6 +12,7 @@ namespace NeonMediaApplication.Interfaces
     {
         event Action<TimeSpan> PositionChanged;
         event Action MediaEnded;
+        event Action<bool> PlayingStateChanged;
         LibVLCSharp.Shared.MediaPlayer MediaPlayer { get; }
         void Load(string filePath);
         Task<bool> ReadMediaAsync();

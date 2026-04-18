@@ -1,5 +1,6 @@
 ﻿using LibVLCSharp.Shared;
 using Microsoft.Win32;
+using NeonMediaApplication.Engine;
 using NeonMediaApplication.Interfaces;
 using NeonMediaApplication.Models;
 using System.Collections.ObjectModel;
@@ -10,29 +11,55 @@ using System.Windows.Documents;
 
 namespace NeonMediaApplication.ViewModels
 {
+    //Напоминание: сделать коллекцию для обложки CoverArt BitMap из массивов байтов !!!
+    //Напоминание: public bool isTurningOn = false; //Статус воспроизведения ?? Потом удалить! Строка 23! Ибо оно нахой не надо теперь
+    //Напоминание: разобраться с обработчиками события и подписками
+    //Напоминание: рассмотреть паттерн наблюдателя
+    //Напоминание: разобраться с слайдером перемотки: перемотка происходит на установленную широкую частоту, при частой перемотке - происходит зависание
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        //Хранение Обьектов
+        //Поля
         private readonly IMediaEngine _mediaEngine; //обьект движка VLC
         private readonly IFileService _fileService; // интерфейс файлового сервиса
         private readonly IDialogService _dialogService; // интерфейс диалога
-        public bool isTurningOn = false; //Статус воспроизведения
+        //public bool isTurningOn = false; //Статус воспроизведения  
+        //Коллекции
         private ObservableCollection<MediaFile> PlayList { get; set; } = new ObservableCollection<MediaFile>(); //Коллекция для хранения плейлиста общая
         public MainWindowViewModel(IMediaEngine mediaEngine, IFileService fileService, IDialogService dialogService) //Конструктор DI
         {
             _mediaEngine = mediaEngine;
             _fileService = fileService;
             _dialogService = dialogService;
-            _mediaEngine.SetVolumeAsync(_volume);
-            _mediaEngine.PositionChanged += pos =>
-            {
-                Application.Current.Dispatcher.Invoke(() => CurrentPosition = pos);
-            };
+            _mediaEngine.SetVolumeAsync(_volume); //Звук
+            _mediaEngine.PositionChanged += pos =>{Application.Current.Dispatcher.Invoke(() => CurrentPosition = pos);}; //Подписка на уведомление текущей позиции
 
             _mediaEngine.MediaEnded += OnMediaEnded;
+
+            _mediaEngine.PlayingStateChanged += state =>{Application.Current.Dispatcher.Invoke(() => IsPlaying = state);}; //Подписка на уведомление состояния проигрывания
         }
-        private double _seekPosition;
-        public double SeekPosition
+        // Observable properties backing fields
+        private bool _isPaused;
+        public bool IsPaused
+        {
+            get=> _isPaused;
+            set
+            {
+                _isPaused = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _isPlaying = false; //Флаг состояния проигрывания
+        public bool IsPlaying
+        {
+            get => _isPlaying;
+            set
+            {
+                _isPlaying = value;
+                OnPropertyChanged();
+            }
+        }
+        private double _seekPosition;//Двустороняя привязка 
+        public double SeekPosition 
         {
             get => _seekPosition;
             set
@@ -43,7 +70,7 @@ namespace NeonMediaApplication.ViewModels
                 _mediaEngine.SeekAsync(TimeSpan.FromSeconds(value));
             }
         }
-        private TimeSpan _duration;
+        private TimeSpan _duration; //Длительность медиафайла
         public TimeSpan Duration
         {
             get => _duration;
@@ -55,7 +82,7 @@ namespace NeonMediaApplication.ViewModels
             }
         }
         public double DurationSeconds => Duration.TotalSeconds;
-        private TimeSpan _currentPosition;
+        private TimeSpan _currentPosition; // текущая позиция воспроизведения
         public TimeSpan CurrentPosition
         {
             get => _currentPosition;
@@ -79,7 +106,7 @@ namespace NeonMediaApplication.ViewModels
                 _mediaEngine.SetVolumeAsync(value);
             }
         }
-        private string _file;
+        private string _file; //Файл парсинга
         public string File
         {
             get => _file;
@@ -108,7 +135,7 @@ namespace NeonMediaApplication.ViewModels
                 return _playCommand ?? (_playCommand = new RelayCommand(async obj =>
                 {
                     await PlayAsync();
-                    isTurningOn = true;
+                    _isPlaying = true;
                 }));
             }
         }
@@ -134,35 +161,21 @@ namespace NeonMediaApplication.ViewModels
                 }));
             }
         }
-        //Методы
-
-        //private async Task OpenFileAsync() //Метод открытия команды ОТКРЫТЬ ФАЙЛ
-        //{
-        //    const string settings = "Медиафайлы|*.mp3;*.flac;*.wav;*.mp4;*.mkv;*.avi|Все файлы|*.*";
-        //    var result = _dialogService.OpenFiles(settings);
-
-        //    if (result == null) return;
-
-        //    foreach (var path in result)
-        //    {
-        //        try
-        //        {
-        //            var mediaFile = await _fileService.ParseFileAsync(path);
-
-        //            PlayList.Add(mediaFile);
-
-        //            CurrentMedia = mediaFile; //Для движка 
-        //            _mediaEngine.Load(mediaFile.FilePath);
-        //            await PlayAsync();     
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _dialogService.ShowError($"Ошибка: {ex.Message}");
-        //        }
-        //    }
-        //}
+        private RelayCommand _stopCommand;
+        public RelayCommand StopCommand
+        {
+            get
+            {
+                return _stopCommand ?? (_stopCommand = new RelayCommand(async obj =>
+                {
+                    await StopAsync();
+                }));
+            }
+        }
+        //Методы Команд
         private async Task OpenFileAsync() //Метод открытия команды ОТКРЫТЬ ФАЙЛ
         {
+            //Логика действий:: вызвать диалоговое окно, принять файл, проивзести парсинг, добавить в плейлист, проивзести загрузку в медиаплеер, начать чтение!!
             const string settings = "Медиафайлы|*.mp3;*.flac;*.wav;*.mp4;*.mkv;*.avi|Все файлы|*.*";
             var result = _dialogService.OpenFiles(settings);
 
@@ -188,28 +201,37 @@ namespace NeonMediaApplication.ViewModels
                 await _mediaEngine.ReadMediaAsync();
                 Duration = _mediaEngine.Duration;
                 await _mediaEngine.PlayAsync();
-                isTurningOn = true;
             }
         }
         private async Task PlayAsync() //Метод RemoteControl: воспроизведения команды PlayCommand
         {
-            if(isTurningOn == false)
+            if(_isPlaying == false || _isPaused == true && _isPlaying == true)
             {
                 await _mediaEngine.PlayAsync();
-                isTurningOn = true;
+                _isPaused = false;
             }
         }
-        private async Task PauseAsync() //Метод RemoteControl: приостановление команды StopCommand 
+        private async Task PauseAsync() //Метод RemoteControl: приостановление команды PauseCommand 
         {
-            if(isTurningOn == true)
+            if(_isPlaying == true && _isPaused == false)
             {
                 await _mediaEngine.PauseAsync();
-                isTurningOn = false;
+                _isPaused = true;
             }
         }
-        private void OnMediaEnded()
+        private async Task StopAsync() //Метод RemoteControl: остановление команды StopCommand
         {
-            Application.Current.Dispatcher.Invoke(async () =>
+            if(_isPlaying == true)
+            {
+                await _mediaEngine.StopAsync();
+                _isPaused = false;
+            }
+          
+        }
+        //Обработчики События
+        private void OnMediaEnded() //Метод для обработки события окончания воспроизведения
+        {
+            Application.Current.Dispatcher.InvokeAsync(async () =>
             {
                 if (PlayList.Count == 0 || CurrentMedia == null) return;
 
@@ -225,12 +247,10 @@ namespace NeonMediaApplication.ViewModels
                     Duration = _mediaEngine.Duration;
 
                     await _mediaEngine.PlayAsync();
-                    isTurningOn = true;
                 }
                 else
                 {
                     await _mediaEngine.StopAsync();
-                    isTurningOn = false;
                     CurrentPosition = TimeSpan.Zero;
                 }
             });

@@ -14,7 +14,7 @@ namespace NeonMediaApplication.Engine
     //Задача: воспроизведение
     //Библиотека LibVLCSharp - взаимодействие с движком для .NET (классы библиотеки: LibVLC, MediaPlayer)
     //Библиотека VideoLAN.LibVLC.Windows - двжиок на C++
-    public class MediaEngine: IDisposable, IMediaEngine
+    public class MediaEngine : IDisposable, IMediaEngine
     {
         //Поля
         private LibVLC _libVLC;
@@ -40,15 +40,17 @@ namespace NeonMediaApplication.Engine
         {
             get { return _mediaPlayer.IsPlaying; }
         }
-
         //События
         public event Action<TimeSpan> PositionChanged;
         public event Action MediaEnded;
+        public event Action<bool> PlayingStateChanged;
+        public event Action Paused;
 
         //Обработчики событий 
         private void OnMediaEnded(object sender, EventArgs e)
         {
             MediaEnded?.Invoke();
+            PlayingStateChanged?.Invoke(false);
         }
         private void OnTimeChanged(object sender, MediaPlayerTimeChangedEventArgs e)
         {
@@ -62,9 +64,12 @@ namespace NeonMediaApplication.Engine
             _libVLC = new LibVLC(); // Создание движка VLC
 
             _mediaPlayer = new MediaPlayer(_libVLC); // Создание обьекта плеера
-
+            //Подписка
             _mediaPlayer.EndReached += OnMediaEnded;
             _mediaPlayer.TimeChanged += OnTimeChanged;
+
+            _mediaPlayer.Playing += (s, e) => PlayingStateChanged?.Invoke(true); //Подписка проигрывани
+            _mediaPlayer.Stopped += (s, e) => PlayingStateChanged?.Invoke(false); //Подписка стоп
         }
         //Загрузка медиа фалйа в двжиок
         public async Task<bool> ReadMediaAsync() //Метод распаковки файла
@@ -89,16 +94,18 @@ namespace NeonMediaApplication.Engine
         }
         public void Load(string filePath) // загрузка медиа файла в плеер
         {
+            //_mediaPlayer.Stop();
             _currentMedia?.Dispose();
             _currentMedia = new Media(_libVLC, filePath); //создание нового обьекта для воспроизведения
         }
-        //Метод работы воспроизведения плеера 
+        //Метод работы воспроизведения плеера
         public async Task PlayAsync() // метод воспроизведения
         {
-            if (_currentMedia != null)
-            {
+            if (_currentMedia == null) return;
+            if (_mediaPlayer.State == VLCState.Paused)
+                _mediaPlayer.Play();
+            else
                 _mediaPlayer.Play(_currentMedia);
-            }
         }
         public async Task PauseAsync() //метод паузы
         {
@@ -122,6 +129,5 @@ namespace NeonMediaApplication.Engine
             _mediaPlayer?.Dispose();
             _libVLC?.Dispose();
         }
-
     }
 }

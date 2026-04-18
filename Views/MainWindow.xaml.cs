@@ -9,6 +9,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using NeonMediaApplication.ViewModels;
+using NeonMediaApplication.Engine;
+using NeonMediaApplication.Interfaces;
 
 namespace NeonMediaApplication.Views
 {
@@ -17,9 +19,13 @@ namespace NeonMediaApplication.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly IMediaEngine _mediaEngine; //Поле обьекта(ссылка на движок)
+        public LibVLCSharp.Shared.MediaPlayer MediaPlayer => _mediaEngine.MediaPlayer; // Свойство возврат объект MediaPlayer из движка
+        public MainWindow(IMediaEngine mediaEngine) 
         {
+            _mediaEngine = mediaEngine;
             InitializeComponent();
+            VideoView.MediaPlayer = mediaEngine.MediaPlayer;
         }
     }
 }
