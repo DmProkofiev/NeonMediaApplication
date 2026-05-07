@@ -33,6 +33,8 @@ namespace NeonMediaApplication
             services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<IMediaEngine, MediaEngine>();
             services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<IExportAudioService, ExportAudioService>();
+
             services.AddTransient<MainWindowViewModel>();
             services.AddTransient<MainWindow>();
         }

@@ -22,29 +22,33 @@ namespace NeonMediaApplication.ViewModels
         private readonly IMediaEngine _mediaEngine; //обьект движка VLC
         private readonly IFileService _fileService; // интерфейс файлового сервиса
         private readonly IDialogService _dialogService; // интерфейс диалога
-        //public bool isTurningOn = false; //Статус воспроизведения  
+        private readonly IExportAudioService _exportAudioService; // кспорт аудио из видео
+
         //Коллекции
         private ObservableCollection<MediaFile> PlayList { get; set; } = new ObservableCollection<MediaFile>(); //Коллекция для хранения плейлиста общая
-        public MainWindowViewModel(IMediaEngine mediaEngine, IFileService fileService, IDialogService dialogService) //Конструктор DI
+        public MainWindowViewModel(IMediaEngine mediaEngine, IFileService fileService, IDialogService dialogService, IExportAudioService exportAudioService) //Конструктор DI
         {
             _mediaEngine = mediaEngine;
             _fileService = fileService;
             _dialogService = dialogService;
+            _exportAudioService = exportAudioService;
+
             _mediaEngine.SetVolumeAsync(_volume); //Звук
-            _mediaEngine.PositionChanged += pos =>{Application.Current.Dispatcher.Invoke(() => CurrentPosition = pos);}; //Подписка на уведомление текущей позиции
+            _mediaEngine.PositionChanged += pos => { Application.Current.Dispatcher.Invoke(() => CurrentPosition = pos); }; //Подписка на уведомление текущей позиции
 
             _mediaEngine.MediaEnded += OnMediaEnded;
 
-            _mediaEngine.PlayingStateChanged += state =>{Application.Current.Dispatcher.Invoke(() => IsPlaying = state);}; //Подписка на уведомление состояния проигрывания
+            _mediaEngine.PlayingStateChanged += state => { Application.Current.Dispatcher.Invoke(() => IsPlaying = state); }; //Подписка на уведомление состояния проигрывания
+
         }
         // Observable properties backing fields
-        private bool _isPaused;
-        public bool IsPaused
+        private bool _isPopUp; // Флаг состояния выпадающего окна
+        public bool IsPopUp
         {
-            get=> _isPaused;
+            get => _isPopUp;
             set
             {
-                _isPaused = value;
+                _isPopUp = value;
                 OnPropertyChanged();
             }
         }
@@ -127,6 +131,18 @@ namespace NeonMediaApplication.ViewModels
             }
         }
         //Команды
+        private RelayCommand _popUpCommand; // Команда для вызова диалога дополнительного функционала
+        public RelayCommand PopUpCommand
+        {
+            get
+            {
+                return _popUpCommand ?? (_popUpCommand = new RelayCommand(async obj => 
+                {
+                    IsPopUp = !IsPopUp;
+                }));
+            }
+        }
+
         private RelayCommand _playCommand; //Плэй
         public RelayCommand PlayCommand //Плэй
         {
@@ -173,6 +189,14 @@ namespace NeonMediaApplication.ViewModels
             }
         }
         //Методы Команд
+        private async Task PopUpAsync() //Метод вызова диалогового окна для доп функционала
+        {
+            //
+        }
+        private async Task ExportAudioAsync() //Метод для экспорта аудио из видео
+        {
+            //сделать проверку на видеофайл, вызвать диалоговое окно для сохранения, произвести экспорт, показать прогресс, обработать ошибки
+        }
         private async Task OpenFileAsync() //Метод открытия команды ОТКРЫТЬ ФАЙЛ
         {
             //Логика действий:: вызвать диалоговое окно, принять файл, проивзести парсинг, добавить в плейлист, проивзести загрузку в медиаплеер, начать чтение!!
@@ -205,18 +229,20 @@ namespace NeonMediaApplication.ViewModels
         }
         private async Task PlayAsync() //Метод RemoteControl: воспроизведения команды PlayCommand
         {
-            if(_isPlaying == false || _isPaused == true && _isPlaying == true)
+
+            if (_isPlaying == false)
             {
                 await _mediaEngine.PlayAsync();
-                _isPaused = false;
+                _isPlaying = true;
             }
         }
         private async Task PauseAsync() //Метод RemoteControl: приостановление команды PauseCommand 
         {
-            if(_isPlaying == true && _isPaused == false)
+
+            if (_isPlaying == true)
             {
                 await _mediaEngine.PauseAsync();
-                _isPaused = true;
+                _isPlaying = false;
             }
         }
         private async Task StopAsync() //Метод RemoteControl: остановление команды StopCommand
@@ -224,7 +250,6 @@ namespace NeonMediaApplication.ViewModels
             if(_isPlaying == true)
             {
                 await _mediaEngine.StopAsync();
-                _isPaused = false;
             }
           
         }

@@ -92,6 +92,15 @@
                 <Button Content="Play" Command="{Binding PlayCommand}" Width="60" Margin="2" Grid.Column="2"/>
                 <Button Content="Stop" Command="{Binding StopCommand}" Width="60" Margin="2" Grid.Column="3"/>
                 <Slider Width="150" Minimum="0" Maximum="100" Value="{Binding Volume, Mode=TwoWay}" Margin="5,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="4"/>
+                <Button x:Name="PopUp" Content="..." Command="{Binding PopUpCommand}" Width="Auto" Height="Auto" Grid.Column="5" Background="#7FFFFFFF" BorderBrush="Transparent" Margin="5,0,5,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Popup IsOpen="{Binding IsPopUp}" PlacementTarget="{Binding ElementName=PopUp}" Placement="Top" StaysOpen="False" OpacityMask="White">
+                    <Border Background="#7FFFFFFF" BorderThickness="1" Padding="1">
+                        <StackPanel>
+                            <Button Content="Экспорт аудио" Command="{Binding ExportAudioCommand}"/>
+                            <Button Content="Изменить" Command="{Binding EditMetadataCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </Popup>
             </Grid>
         </Grid>
     </Grid>

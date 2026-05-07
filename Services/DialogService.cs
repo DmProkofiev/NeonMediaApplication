@@ -21,7 +21,6 @@ namespace NeonMediaApplication.Services
 
             return dialog.ShowDialog() == true ? dialog.FileNames : null;
         }
-
         public void ShowError(string message, string title = "Ошибка")
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
