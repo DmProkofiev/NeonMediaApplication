@@ -9,6 +9,6 @@ namespace NeonMediaApplication.Interfaces
     //Экспорт аудио из видео
     public interface IExportAudioService
     {
-        //Task ExportAudioAsync(string videoFilePath, string outputFilePath, IProgress<double> progress, CancellationToken cancellationToken = default);
+        Task ExportAudioAsync(string videoFilePath, string outputFilePath);
     }
 }

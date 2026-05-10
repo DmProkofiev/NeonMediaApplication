@@ -11,5 +11,7 @@ namespace NeonMediaApplication.Interfaces
     {
         string[] OpenFiles(string filter);
         void ShowError(string message, string title = "Ошибка");
+        void ShowMessage(string message, string title = "Информация");
+        string SaveFile(string filter, string defaultExtension = "", string title = "Сохранить как");
     }
 }

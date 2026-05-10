@@ -10,6 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ffmpeg.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ffmpeg.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Resources\" />
   </ItemGroup>
 
@@ -20,6 +30,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="TagLibSharp" Version="2.2.0" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.23" />
+    <PackageReference Include="Xabe.FFmpeg" Version="6.0.2" />
   </ItemGroup>
 
 </Project>

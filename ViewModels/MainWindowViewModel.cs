@@ -1,19 +1,14 @@
-﻿using LibVLCSharp.Shared;
-using Microsoft.Win32;
-using NeonMediaApplication.Engine;
-using NeonMediaApplication.Interfaces;
+﻿using NeonMediaApplication.Interfaces;
 using NeonMediaApplication.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Documents;
+using System.Windows.Input;
 
 namespace NeonMediaApplication.ViewModels
 {
     //Напоминание: сделать коллекцию для обложки CoverArt BitMap из массивов байтов !!!
-    //Напоминание: public bool isTurningOn = false; //Статус воспроизведения ?? Потом удалить! Строка 23! Ибо оно нахой не надо теперь
-    //Напоминание: разобраться с обработчиками события и подписками
     //Напоминание: рассмотреть паттерн наблюдателя
     //Напоминание: разобраться с слайдером перемотки: перемотка происходит на установленную широкую частоту, при частой перемотке - происходит зависание
     public class MainWindowViewModel : INotifyPropertyChanged
@@ -26,6 +21,7 @@ namespace NeonMediaApplication.ViewModels
 
         //Коллекции
         private ObservableCollection<MediaFile> PlayList { get; set; } = new ObservableCollection<MediaFile>(); //Коллекция для хранения плейлиста общая
+        public ObservableCollection<string> PopupMenuItems { get; } = new ObservableCollection<string>();
         public MainWindowViewModel(IMediaEngine mediaEngine, IFileService fileService, IDialogService dialogService, IExportAudioService exportAudioService) //Конструктор DI
         {
             _mediaEngine = mediaEngine;
@@ -63,7 +59,7 @@ namespace NeonMediaApplication.ViewModels
             }
         }
         private double _seekPosition;//Двустороняя привязка 
-        public double SeekPosition 
+        public double SeekPosition
         {
             get => _seekPosition;
             set
@@ -136,13 +132,29 @@ namespace NeonMediaApplication.ViewModels
         {
             get
             {
-                return _popUpCommand ?? (_popUpCommand = new RelayCommand(async obj => 
+                return _popUpCommand ?? (_popUpCommand = new RelayCommand(async obj =>
                 {
                     IsPopUp = !IsPopUp;
+                    UpdatePopupMenu();
                 }));
             }
         }
-
+        public ICommand ExecutePopupItemCommand => new RelayCommand(param => // Логика  выбора пункта меню
+        {
+            if (param is string menuItem)
+            {
+                IsPopUp = false;
+                switch (menuItem)
+                {
+                    case "Экспорт аудио":
+                        ExportAsync();
+                        break;
+                    case "Редактировать метаданные":
+                        //EditMetadataLogic();
+                        break;
+                }
+            }
+        });
         private RelayCommand _playCommand; //Плэй
         public RelayCommand PlayCommand //Плэй
         {
@@ -189,13 +201,19 @@ namespace NeonMediaApplication.ViewModels
             }
         }
         //Методы Команд
-        private async Task PopUpAsync() //Метод вызова диалогового окна для доп функционала
+        private void UpdatePopupMenu()
         {
-            //
-        }
-        private async Task ExportAudioAsync() //Метод для экспорта аудио из видео
-        {
-            //сделать проверку на видеофайл, вызвать диалоговое окно для сохранения, произвести экспорт, показать прогресс, обработать ошибки
+            PopupMenuItems.Clear();
+
+            if (CurrentMedia is Video)
+            {
+                PopupMenuItems.Add("Экспорт аудио");
+                PopupMenuItems.Add("Редактировать метаданные");
+            }
+            else if (CurrentMedia is Audio)
+            {
+                PopupMenuItems.Add("Редактировать метаданные");
+            }
         }
         private async Task OpenFileAsync() //Метод открытия команды ОТКРЫТЬ ФАЙЛ
         {
@@ -247,11 +265,36 @@ namespace NeonMediaApplication.ViewModels
         }
         private async Task StopAsync() //Метод RemoteControl: остановление команды StopCommand
         {
-            if(_isPlaying == true)
+            if (_isPlaying == true)
             {
                 await _mediaEngine.StopAsync();
             }
-          
+
+        }
+        private async Task ExportAsync() // Метод для экспорта
+        {
+            if (!(CurrentMedia is Video video))
+            {
+                _dialogService.ShowError("Экспорт доступен только для видеофайлов.");
+                return;
+            }
+
+            string filter = "MP3 файлы|*.mp3|AAC файлы|*.aac|FLAC файлы|*.flac|OGG файлы|*.ogg";
+            string outputPath = _dialogService.SaveFile(filter, "mp3", "Сохранить аудио");
+            if (string.IsNullOrEmpty(outputPath))
+                return;
+
+            try
+            {
+
+                await _exportAudioService.ExportAudioAsync(video.FilePath, outputPath);
+                _dialogService.ShowMessage("Экспорт аудио успешно завершён.");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Ошибка экспорта: {ex.Message}");
+            }
+
         }
         //Обработчики События
         private void OnMediaEnded() //Метод для обработки события окончания воспроизведения

@@ -25,5 +25,20 @@ namespace NeonMediaApplication.Services
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        public void ShowMessage(string message, string title = "Информация")
+        {
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        public string? SaveFile(string filter, string defaultExtension = "", string title = "Сохранить как")
+        {
+            var dialog = new SaveFileDialog
+            {
+                Filter = filter,
+                DefaultExt = defaultExtension,
+                Title = title
+            };
+            return dialog.ShowDialog() == true ? dialog.FileName : null;
+        }
     }
 }
