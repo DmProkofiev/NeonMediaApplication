@@ -1,0 +1,105 @@
+﻿<Window x:Class="NeonMediaApplication.Views.MetadataAudioWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Изменение данных"
+        Width="550" Height="650"
+        ResizeMode="NoResize"
+        xmlns:ViewModels="clr-namespace:NeonMediaApplication.ViewModels"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="Times New Roman">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Название:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Title, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Исполнитель:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Artist, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Альбом:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Album, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Жанр:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Genre, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <Grid Grid.Row="4" Grid.ColumnSpan="2" Margin="0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="80"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Год:" Grid.Column="0" VerticalAlignment="Center" FontSize="14"/>
+            <TextBox Text="{Binding ThisAudioDTO.Year, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="0,0,10,0" FontSize="14"/>
+            <TextBlock Text="Номер трека:" Grid.Column="2" VerticalAlignment="Center" FontSize="14" Margin="10,0,0,0"/>
+            <TextBox Text="{Binding ThisAudioDTO.TrackNumber, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Margin="5,0,0,0" FontSize="14"/>
+        </Grid>
+
+        <Grid Grid.Row="5" Grid.ColumnSpan="2" Margin="0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="80"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Номер диска:" Grid.Column="0" VerticalAlignment="Center" FontSize="14"/>
+            <TextBox Text="{Binding ThisAudioDTO.DiscNumber, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="0,0,10,0" FontSize="14"/>
+            <TextBlock Text="Рейтинг:" Grid.Column="2" VerticalAlignment="Center" FontSize="14" Margin="10,0,0,0"/>
+            <ComboBox Text="{Binding ThisAudioDTO.Rating, UpdateSourceTrigger=PropertyChanged}" Grid.Column="3" Margin="5,0,0,0" FontSize="14">
+                <ComboBoxItem Content="1"/>
+                <ComboBoxItem Content="2"/>
+                <ComboBoxItem Content="3"/>
+                <ComboBoxItem Content="4"/>
+                <ComboBoxItem Content="5"/>
+            </ComboBox>
+        </Grid>
+
+        <TextBlock Text="Композитор:" Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Composer, UpdateSourceTrigger=PropertyChanged}" Grid.Row="6" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Автор текста:" Grid.Row="7" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Lyricist, UpdateSourceTrigger=PropertyChanged}" Grid.Row="7" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Комментарий:" Grid.Row="8" Grid.Column="0" VerticalAlignment="Top" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Comment, UpdateSourceTrigger=PropertyChanged}" Grid.Row="8" Grid.Column="1" Margin="0,5" FontSize="14" Height="60" TextWrapping="Wrap"/>
+
+        <TextBlock Text="Язык:" Grid.Row="9" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Language, UpdateSourceTrigger=PropertyChanged}" Grid.Row="9" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Группировка:" Grid.Row="10" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <TextBox Text="{Binding ThisAudioDTO.Grouping, UpdateSourceTrigger=PropertyChanged}" Grid.Row="10" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Дата релиза:" Grid.Row="11" Grid.Column="0" VerticalAlignment="Center" Margin="0,5" FontSize="14"/>
+        <DatePicker SelectedDate="{Binding ThisAudioDTO.ReleaseDate, UpdateSourceTrigger=PropertyChanged}" Grid.Row="11" Grid.Column="1" Margin="0,5" FontSize="14"/>
+
+        <TextBlock Text="Обложка:" Grid.Row="12" Grid.Column="0" VerticalAlignment="Top" Margin="0,10,0,0" FontSize="14"/>
+        <StackPanel Grid.Row="12" Grid.Column="1" Orientation="Horizontal" Margin="0,5">
+            <Image Source="{Binding ThisAudioDTO.CoverImage}" Width="120" Height="120" Stretch="Uniform" Margin="0,0,10,0"/>
+            <Button Command="{Binding ChooseCoverCommand}" Content="Выбрать обложку" Width="120" Height="30" FontSize="12"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="13" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,15,0,5">
+            <Button Command="{Binding SetAudioCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Content="OK" Width="80" Height="30" Margin="0,0,10,0" FontSize="14"/>
+            <Button Command="{Binding CancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Content="Отмена" Width="80" Height="30" FontSize="14"/>
+        </StackPanel>
+    </Grid>
+</Window>

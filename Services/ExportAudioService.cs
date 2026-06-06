@@ -33,6 +33,35 @@ namespace NeonMediaApplication.Services
                 throw new DirectoryNotFoundException($"Папка назначения не существует: {outputDir}");
 
             await Task.Run(() => ConvertVideoToAudio(videoFilePath, outputFilePath));
+            await WaitForFileReady(outputFilePath);
+        }
+
+        private async Task WaitForFileReady(string filePath, int maxAttempts = 20, int delayMs = 250)
+        {
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                if (File.Exists(filePath))
+                {
+                    try
+                    {
+                        using (var stream = File.Open(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                        {
+                            return;
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        if (i == maxAttempts - 1) throw;
+                        await Task.Delay(delayMs);
+                    }
+                }
+                else
+                {
+                    if (i == maxAttempts - 1)
+                        throw new FileNotFoundException($"Файл не создан: {filePath}");
+                    await Task.Delay(delayMs);
+                }
+            }
         }
 
         private void ConvertVideoToAudio(string videoFilePath, string outputFilePath)

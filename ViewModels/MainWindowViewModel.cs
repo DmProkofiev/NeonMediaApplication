@@ -1,7 +1,12 @@
-﻿using NeonMediaApplication.Interfaces;
+﻿using Microsoft.Win32;
+using NeonMediaApplication.DTO;
+using NeonMediaApplication.Interfaces;
 using NeonMediaApplication.Models;
+using NeonMediaApplication.Services;
+using NeonMediaApplication.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -9,7 +14,6 @@ using System.Windows.Input;
 namespace NeonMediaApplication.ViewModels
 {
     //Напоминание: сделать коллекцию для обложки CoverArt BitMap из массивов байтов !!!
-    //Напоминание: рассмотреть паттерн наблюдателя
     //Напоминание: разобраться с слайдером перемотки: перемотка происходит на установленную широкую частоту, при частой перемотке - происходит зависание
     public class MainWindowViewModel : INotifyPropertyChanged
     {
@@ -18,16 +22,18 @@ namespace NeonMediaApplication.ViewModels
         private readonly IFileService _fileService; // интерфейс файлового сервиса
         private readonly IDialogService _dialogService; // интерфейс диалога
         private readonly IExportAudioService _exportAudioService; // кспорт аудио из видео
+        private readonly IMetadataAudioService _metadataAudioService; //Редактирование метаданных аудио
 
         //Коллекции
         private ObservableCollection<MediaFile> PlayList { get; set; } = new ObservableCollection<MediaFile>(); //Коллекция для хранения плейлиста общая
         public ObservableCollection<string> PopupMenuItems { get; } = new ObservableCollection<string>();
-        public MainWindowViewModel(IMediaEngine mediaEngine, IFileService fileService, IDialogService dialogService, IExportAudioService exportAudioService) //Конструктор DI
+        public MainWindowViewModel(IMediaEngine mediaEngine, IFileService fileService, IDialogService dialogService, IExportAudioService exportAudioService, IMetadataAudioService metadataAudioService) //Конструктор DI
         {
             _mediaEngine = mediaEngine;
             _fileService = fileService;
             _dialogService = dialogService;
             _exportAudioService = exportAudioService;
+            _metadataAudioService = metadataAudioService;
 
             _mediaEngine.SetVolumeAsync(_volume); //Звук
             _mediaEngine.PositionChanged += pos => { Application.Current.Dispatcher.Invoke(() => CurrentPosition = pos); }; //Подписка на уведомление текущей позиции
@@ -35,7 +41,7 @@ namespace NeonMediaApplication.ViewModels
             _mediaEngine.MediaEnded += OnMediaEnded;
 
             _mediaEngine.PlayingStateChanged += state => { Application.Current.Dispatcher.Invoke(() => IsPlaying = state); }; //Подписка на уведомление состояния проигрывания
-
+            _metadataAudioService = metadataAudioService;
         }
         // Observable properties backing fields
         private bool _isPopUp; // Флаг состояния выпадающего окна
@@ -126,6 +132,16 @@ namespace NeonMediaApplication.ViewModels
                 OnPropertyChanged();
             }
         }
+        private AudioDTO _thisAudioDTO;
+        public AudioDTO ThisAudioDTO
+        {
+            get => _thisAudioDTO;
+            set
+            {
+                _thisAudioDTO = value;
+                OnPropertyChanged();
+            }
+        }
         //Команды
         private RelayCommand _popUpCommand; // Команда для вызова диалога дополнительного функционала
         public RelayCommand PopUpCommand
@@ -149,8 +165,9 @@ namespace NeonMediaApplication.ViewModels
                     case "Экспорт аудио":
                         ExportAsync();
                         break;
-                    case "Редактировать метаданные":
-                        //EditMetadataLogic();
+                    case "Изменить":
+                        if (CurrentMedia is Audio audio )
+                            MetadataAudioAsync(audio.FilePath);
                         break;
                 }
             }
@@ -200,6 +217,41 @@ namespace NeonMediaApplication.ViewModels
                 }));
             }
         }
+        private RelayCommand _setAudioCommand;
+        public RelayCommand SetAudioCommand => _setAudioCommand ??= new RelayCommand(obj =>
+        {
+            if (obj is Window window)
+            {
+                window.DialogResult = true;
+                window.Close();
+            }
+        });
+
+        private RelayCommand _cancelMetadataAudioCommand;
+        public RelayCommand CancelMetadataAudioCommand => _cancelMetadataAudioCommand ??= new RelayCommand(obj =>
+        {
+            if (obj is Window window)
+            {
+                window.DialogResult = false;
+                window.Close();
+            }
+        });
+
+        private RelayCommand _chooseCoverCommand;
+        public RelayCommand ChooseCoverCommand => _chooseCoverCommand ??= new RelayCommand(obj =>
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "Изображения|*.jpg;*.jpeg;*.png",
+                Title = "Выберите обложку"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                var coverBytes = System.IO.File.ReadAllBytes(dialog.FileName);
+                if (ThisAudioDTO != null)
+                    ThisAudioDTO.CoverArt = coverBytes;
+            }
+        });
         //Методы Команд
         private void UpdatePopupMenu()
         {
@@ -212,7 +264,7 @@ namespace NeonMediaApplication.ViewModels
             }
             else if (CurrentMedia is Audio)
             {
-                PopupMenuItems.Add("Редактировать метаданные");
+                PopupMenuItems.Add("Изменить");
             }
         }
         private async Task OpenFileAsync() //Метод открытия команды ОТКРЫТЬ ФАЙЛ
@@ -271,30 +323,112 @@ namespace NeonMediaApplication.ViewModels
             }
 
         }
-        private async Task ExportAsync() // Метод для экспорта
+        private async Task ExportAsync()
         {
-            if (!(CurrentMedia is Video video))
+            if (CurrentMedia is not Video video)
             {
-                _dialogService.ShowError("Экспорт доступен только для видеофайлов.");
+                _dialogService.ShowError("Экспорт доступен только для видео");
                 return;
             }
 
+            string fileName = Path.GetFileNameWithoutExtension(video.FileName);
             string filter = "MP3 файлы|*.mp3|AAC файлы|*.aac|FLAC файлы|*.flac|OGG файлы|*.ogg";
-            string outputPath = _dialogService.SaveFile(filter, "mp3", "Сохранить аудио");
+            string outputPath = _dialogService.SaveFile(filter, fileName, "mp3", "Сохранить аудио");
             if (string.IsNullOrEmpty(outputPath))
                 return;
 
             try
             {
-
                 await _exportAudioService.ExportAudioAsync(video.FilePath, outputPath);
-                _dialogService.ShowMessage("Экспорт аудио успешно завершён.");
+                _dialogService.ShowMessage("Аудио успешно извлечено.");
             }
             catch (Exception ex)
             {
-                _dialogService.ShowError($"Ошибка экспорта: {ex.Message}");
+                _dialogService.ShowError($"Ошибка извлечения: {ex.Message}");
+                return;
             }
 
+            var dto = new AudioDTO();
+            var window = new MetadataAudioWindow();
+            window.DataContext = dto;
+
+            if (window.ShowDialog() != true)
+            {
+                _dialogService.ShowMessage("Метаданные не сохранены, но аудио извлечено.");
+                return;
+            }
+
+            try
+            {
+                var audio = new Audio
+                {
+                    FilePath = outputPath,
+                    Title = dto.Title,
+                    Artist = dto.Artist,
+                    Album = dto.Album,
+                    Genre = dto.Genre,
+                    Year = dto.Year,
+                    TrackNumber = dto.TrackNumber,
+                    Composer = dto.Composer,
+                    Comment = dto.Comment,
+                    Grouping = dto.Grouping,
+                    CoverArt = dto.CoverArt
+                };
+
+                await _metadataAudioService.SaveMetadataAsync(audio);
+                if (audio.CoverArt != null)
+                    await _metadataAudioService.SaveCoverArtAsync(outputPath, audio.CoverArt);
+
+                PlayList.Add(audio);
+                _dialogService.ShowMessage("Метаданные успешно сохранены.");
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Ошибка сохранения метаданных: {ex.Message}");
+            }
+        }
+        private async Task<bool> MetadataAudioAsync(string filePath)
+        {
+            ThisAudioDTO = new AudioDTO();
+            var window = new MetadataAudioWindow();
+            window.DataContext = this;
+
+            if (window.ShowDialog() != true)
+                return false;
+
+            var result = ThisAudioDTO;
+
+            var item = new Audio
+            {
+                FilePath = filePath,
+                Title = result.Title,
+                Artist = result.Artist,
+                Album = result.Album,
+                Genre = result.Genre,
+                Year = result.Year,
+                TrackNumber = result.TrackNumber,
+                Composer = result.Composer,
+                Lyricist = result.Lyricist,
+                Comment = result.Comment,
+                Language = result.Language,
+                ReleaseDate = result.ReleaseDate,
+                Grouping = result.Grouping,
+                Rating = result.Rating,
+                CoverArt = result.CoverArt
+            };
+
+            try
+            {
+                await _metadataAudioService.SaveMetadataAsync(item);
+                if (item.CoverArt != null)
+                    await _metadataAudioService.SaveCoverArtAsync(filePath, item.CoverArt);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"Ошибка сохранения: {ex.Message}");
+                return false;
+            }
         }
         //Обработчики События
         private void OnMediaEnded() //Метод для обработки события окончания воспроизведения

@@ -30,13 +30,14 @@ namespace NeonMediaApplication.Services
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        public string? SaveFile(string filter, string defaultExtension = "", string title = "Сохранить как")
+        public string? SaveFile(string filter, string fileName, string defaultExtension = "", string title = "Сохранить как")
         {
             var dialog = new SaveFileDialog
             {
                 Filter = filter,
                 DefaultExt = defaultExtension,
-                Title = title
+                Title = title,
+                FileName = fileName
             };
             return dialog.ShowDialog() == true ? dialog.FileName : null;
         }
