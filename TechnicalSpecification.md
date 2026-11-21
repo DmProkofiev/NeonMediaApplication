@@ -33,6 +33,111 @@ Neon Media Player — кроссплатформенный медиаплеер 
 **Перечисления:**
 	enum MediaType — тип медиафайла (Audio, Video)
 
+### 3.2. Метаданные аудио и видео
+
+#### 3.2.1. Общие метаданные (базовый класс MediaFile)
+
+Поля, общие для любого медиафайла (аудио и видео). Источник получения: файловая система + TagLibSharp (для тегов) + LibVLC (для длительности и кодеков).
+
+| Поле | Тип | Описание | Источник | Пример |
+|------|-----|----------|----------|--------|
+| Id | Guid | Уникальный идентификатор записи в библиотеке приложения. Генерируется при добавлении файла. | Приложение | 3fa85f64-5717-4562-b3fc-2c963f66afa6 |
+| FilePath | string | Полный абсолютный путь к медиафайлу на диске. | Файловая система | C:\Music\Wakanda.mp3 |
+| FileName | string | Имя файла с расширением. | Файловая система | Wakanda.mp3 |
+| FileSize | long | Размер файла в байтах. | Файловая система | 8452312 |
+| Duration | TimeSpan | Продолжительность медиафайла (трека или видео). | LibVLC / TagLibSharp | 00:04:22 |
+| MediaType | MediaType | Тип медиафайла: Audio или Video. | Приложение | Audio |
+| DateAdded | DateTime | Дата и время добавления файла в библиотеку. | Приложение | 2026-01-15 14:30:00 |
+| DateModified | DateTime | Дата и время последнего изменения метаданных или файла. | Приложение / Файловая система | 2026-02-20 10:15:00 |
+| Checksum | string | Контрольная сумма файла (MD5/SHA-256) для идентификации дублей и проверки целостности. | Приложение | a3f1b2c4d5e6... |
+| Title | string | Название трека, песни или видеоролика. Отображается в списке библиотеки. | TagLibSharp | Wakanda |
+| Artist | string | Основной исполнитель / артист. Для видео — создатель или канал. | TagLibSharp | Ludwig Göransson |
+| Album | string | Название альбома, к которому относится трек. Для видео может быть пустым. | TagLibSharp | Разные песни |
+| Genre | string | Жанр медиафайла. | TagLibSharp | Soundtrack |
+| Year | int? | Год выпуска трека, альбома или видео. | TagLibSharp | 2018 |
+| Rating | int? | Пользовательский рейтинг (например, 0–5 звёзд или 0–100). | Приложение | 5 |
+| Comments | string | Комментарии пользователя к медиафайлу. | TagLibSharp | Любимый трек |
+| PlayCount | int | Количество воспроизведений. Увеличивается при каждом проигрывании. | Приложение | 42 |
+| CoverArt | byte[] | Данные обложки альбома / постера видео в байтах (JPEG/PNG). | TagLibSharp | [байты изображения] |
+| Lyrics | string | Текст песни (для аудио) или описание (для видео). | TagLibSharp | Текст песни... |
+| SortTitle | string | Поле для сортировки по названию (используется вместо Title при сортировке). | TagLibSharp | Wakanda |
+| SortArtist | string | Поле для сортировки по артисту. | TagLibSharp | Göransson, Ludwig |
+| SortAlbum | string | Поле для сортировки по альбому. | TagLibSharp | Разные песни |
+
+#### 3.2.2. Метаданные аудио (класс Audio : MediaFile)
+
+Дополнительные поля, специфичные для аудиофайлов. Источник: TagLibSharp (теги), FFmpeg.AutoGen (технические параметры потока), LibVLC (декодирование).
+
+| Поле | Тип | Описание | Источник | Пример |
+|------|-----|----------|----------|--------|
+| TrackNumber | int? | Номер дорожки в альбоме (трек №). | TagLibSharp | 1 |
+| TrackTotal | int? | Общее количество дорожек в альбоме. | TagLibSharp | 13 |
+| DiscNumber | int? | Номер диска (для много-дисковых альбомов, сборников). | TagLibSharp | 1 |
+| DiscTotal | int? | Общее количество дисков в альбоме. | TagLibSharp | 1 |
+| Composer | string | Композитор произведения. | TagLibSharp | Ludwig Göransson |
+| Conductor | string | Дирижёр (для классической музыки). | TagLibSharp | — |
+| Performer | string | Исполнитель, если отличается от основного артиста. | TagLibSharp | — |
+| Grouping | string | Группировка треков (например, movimientos в классике). | TagLibSharp | — |
+| Bpm | int? | Темп compositions (ударов в минуту). | TagLibSharp | 120 |
+| IsCompilation | bool | Признак сборника (треки разных исполнителей в одном альбоме). | TagLibSharp | false |
+| Bitrate | int? | Аудиобитрейт в килобитах в секунду. | FFmpeg.AutoGen | 320 |
+| SampleRate | int? | Частота дискретизации в Герцах. | FFmpeg.AutoGen | 44100 |
+| Channels | int? | Количество аудиоканалов (1 — моно, 2 — стерео, и т.д.). | FFmpeg.AutoGen | 2 |
+| Codec | string | Аудиокодек (MP3, AAC, FLAC, Opus, WMA и др.). | FFmpeg.AutoGen / LibVLC | MP3 |
+| EncodingTool | string | Инструмент/кодировщик, использованный для создания файла. | TagLibSharp | LAME 3.99 |
+| Publisher | string | Издатель / лейбл. | TagLibSharp | — |
+| Copyright | string | Информация об авторских правах. | TagLibSharp | — |
+
+#### 3.2.3. Метаданные видео (класс Video : MediaFile)
+
+Дополнительные поля, специфичные для видеофайлов. Источник: LibVLC (декодирование потоков), FFmpeg.AutoGen (технические параметры), TagLibSharp (теги контейнера).
+
+| Поле | Тип | Описание | Источник | Пример |
+|------|-----|----------|----------|--------|
+| Title | string | Название видео (из тегов контейнера или имени файла). | TagLibSharp | Wakanda (Official Soundtrack) |
+| Description | string | Описание видеоролика (из тегов контейнера). | TagLibSharp | Саундтрек к фильму |
+| Tag | string | Ключевые слова / теги для поиска. | TagLibSharp | саундтрек, фильм, музыка |
+| Genre | string | Жанр видео. | TagLibSharp | Саундтрек |
+| Year | int? | Год выпуска видео. | TagLibSharp | 2018 |
+| Rating | int? | Пользовательский рейтинг (0–5). | Приложение | 4 |
+| Width | int? | Ширина кадра в пикселях. | LibVLC / FFmpeg.AutoGen | 1920 |
+| Height | int? | Высота кадра в пикселях. | LibVLC / FFmpeg.AutoGen | 1080 |
+| FrameRate | double? | Частота кадров в секунду (fps). | LibVLC / FFmpeg.AutoGen | 23.976 |
+| VideoCodec | string | Видеокодек (H.264, H.265, VP9, AV1 и др.). | LibVLC / FFmpeg.AutoGen | H.264 |
+| VideoBitrate | int? | Видеобитрейт в килобитах в секунду. | FFmpeg.AutoGen | 5000 |
+| AudioCodec | string | Аудиокодек видеодорожки (AAC, MP3, AC3 и др.). | LibVLC / FFmpeg.AutoGen | AAC |
+| AudioBitrate | int? | Аудиобитрейт видеодорожки в кбит/с. | FFmpeg.AutoGen | 192 |
+| AudioChannels | int? | Количество аудиоканалов в видео. | FFmpeg.AutoGen | 2 |
+| AudioSampleRate | int? | Частота дискретизации аудио в видео (Гц). | FFmpeg.AutoGen | 48000 |
+| Subtitles | List<string> | Список путей к внешним файлам субтитров или встроенные дорожки. | LibVLC / Файловая система | [subs.srt] |
+| AspectRatio | string | Соотношение сторон кадра (16:9, 4:3, 21:9 и др.). | LibVLC | 16:9 |
+| Duration | TimeSpan | Продолжительность видео. | LibVLC | 02:05:30 |
+| CoverArt | byte[] | Кадр-заставка / постер видео. | TagLibSharp / LibVLC | [байты изображения] |
+| PlayCount | int | Количество воспроизведений. | Приложение | 5 |
+| DateAdded | DateTime | Дата добавления в библиотеку. | Приложение | 2026-01-15 |
+| DateModified | DateTime | Дата изменения метаданных. | Приложение | 2026-02-20 |
+| Checksum | string | Контрольная сумма файла. | Приложение | a3f1b2c4... |
+
+#### 3.2.4. Источники получения метаданных
+
+| Источник | Отвечает за | Используется в классах |
+|----------|-------------|------------------------|
+| Файловая система | FilePath, FileName, FileSize, даты создания/изменения файла | MediaFile |
+| TagLibSharp | Title, Artist, Album, Genre, Year, TrackNumber, Composer, CoverArt, Lyrics, Description, Tag и др. теги контейнеров | MediaFile, Audio, Video |
+| FFmpeg.AutoGen | Bitrate, SampleRate, Channels, Codec, Width, Height, FrameRate, VideoCodec, VideoBitrate, AudioCodec, AudioBitrate | Audio, Video |
+| LibVLC | Duration, VideoCodec, AudioCodec, AspectRatio, Subtitles (декодирование и чтение потоков) | MediaFile, Audio, Video |
+| Приложение (библиотека) | Id, DateAdded, DateModified, Checksum, Rating, Comments, PlayCount, Sort-поля | MediaFile, Audio, Video |
+
+#### 3.2.5. DTO (Data Transfer Object)
+
+**AudioDTO** — сущность для передачи редактируемых пользователем полей между представлением (View) и слоем бизнес-логики. Является аналогом окна «Детали» в iTunes. Содержит подмножество полей из Audio, доступных для изменения через интерфейс:
+
+- Title, Artist, Album, Genre, Year, Rating, Comments, TrackNumber, TrackTotal, DiscNumber, DiscTotal, Composer, Performer, Grouping, Bpm, IsCompilation, CoverArt, Lyrics.
+
+**VideoDTO** — сущность для редактирования метаданных видеофайла через интерфейс:
+
+- Title, Description, Tag, Genre, Year, Rating, CoverArt, Subtitles.
+
 ---
 
 ## 4. Функциональные требования
@@ -45,13 +150,13 @@ Neon Media Player — кроссплатформенный медиаплеер 
 
 ### 4.2. Работа с медиафайлами
 - создание и управление плейлистами;
-- поддержка популярных форматов медиафайлов (MP3, MP4, AVI, MKV и др.);
 - интеграция с движком VLC для декодирования и воспроизведения медиа;
 - воспроизведение аудио и видео;
 - извлечение аудио из видеофайлов;
 - конвертация форматов;
 - возобновление воспроизведения с последней позиции (асинхронная файловая операция логирования);
 - редактирование метаданных файлов, в том числе обложка альбома.
+- дебаунс (debounce) — задержка обработки событий;
 
 ### 4.3. Фоновые службы
 - работа приложения в фоновом режиме.
@@ -64,7 +169,13 @@ Neon Media Player — кроссплатформенный медиаплеер 
 - визуальное оформление: неон с RGB-подсветкой;
 - эффект размытого стекла (акрил) при перетаскивании окна курсором;
 - поддержка тёмной и светлой тем;
-- адаптивная вёрстка под различные разрешения экрана.
+- адаптивная вёрстка под различные разрешения экрана
+
+### 5.2. Архитектура окон и элементов
+
+- Основное окно приложения — **DashBoard**.
+- Воспроизведение аудио и видео реализовано в виде **UserControl** (выделенный компонент плеера).
+- Аудио может воспроизводиться также прямо в **DashBoard** (встроенный плеер на главном экране).
 
 ---
 
